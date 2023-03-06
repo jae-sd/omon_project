@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Status</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+    <link rel="stylesheet" href="../upload-status.css">
+</head>
+<body onload="loadUserData()">
+    <div class="container">
+        <div class="navbar">
+            <span class="logo">LOGO</span>
+            <div>
+                <div class="button">
+                    <span class="upload">
+                        <a href="/upload">Upload</a>
+                    </span>
+                </div>
+                <div class="button">
+                    <span class="logout">
+                        <a href="/logout">Logout</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-body">
+                <div class="title">Waiting For Verification</div>
+                <form action="/" method="GET">
+
+
+                    <div class="details">
+                        <p class="subtitle">Personal Details</p>
+                        <div>
+                            <span>Firstname:</span>
+                            <div class="name" id="fname">_____________</div>
+                        </div>
+                        <div>
+                            <span>Surname:</span>
+                            <div class="name" id="sname">_____________</div>
+                        </div>
+                        <div>
+                            <span>Lastname:</span>
+                            <div class="name" id="lname">_____________</div>
+                        </div>
+                    </div>
+
+                    <!-- state etc -->
+                    <div class="location">
+                        <p class="subtitle">Address</p>
+                        <div>
+                            <span>State:</span>
+                            <div class="name" id="state">_____________</div>
+                        </div>
+                        <div>
+                            <span>Address:</span>
+                            <div class="name" id="lga">_____________</div>
+                        </div>
+                        <div>
+                            <span>DOB:</span>
+                            <div class="name" id="dob">_____________</div>
+                        </div>
+                    </div>
+
+
+                    <div class="files">
+                        <p class="subtitle">Uploaded Files</p>
+                        <div>
+                            <span>Waec</span>
+                            <input type="text" placeholder="waec" name="waec" id="waec" disabled>
+
+                            <!-- for setting image -->
+                            <span class="material-icons-outlined preview">preview
+                                <input type="submit" name="waec-p" id="waec-i" hidden>
+                            </span>
+                            <div class="message" id="waec-message">
+                                <span>Rejected</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span>Neco</span>
+                            <input type="text" placeholder="neco" name="neco" id="neco" disabled>
+
+                            <!-- for setting image -->
+                            <span class="material-icons-outlined preview">preview
+                                <input type="text" name="neco-p" id="neco-i" hidden>
+                            </span>
+                            <div class="message" id="neco-message">
+                                <span>Rejected</span>
+                            </div>
+                        </div>
+                        <div>
+                            <span>Utme</span>
+                            <input type="text" placeholder="utme" name="utme" id="utme" disabled>
+
+                            <!-- for setting image -->
+                            <span class="material-icons-outlined preview">preview
+                                <input type="text" name="utme-p" id="utme-i" hidden>
+                            </span>
+                            <div class="message" id="utme-message">
+                                <span>Rejected</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- image previewer -->
+                    <div class="image-container active" id="image-container"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- load data -->
+    <script>
+        async function loadUserData() {
+            const queryString = window.location.search;
+
+            const urlParams = new URLSearchParams(queryString);
+            let id = urlParams.get('user')
+            if(!id) return console.error("Invalid User Id")
+
+            let request = await fetch(`/data/${id}`, {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
+     
+            let data = await request.json()
+            
+            return request.status === 200 ? profileAndFiles(data) : console.log("Error: ", data.message)
+        }
+    </script>
+
+    <!-- Form and status handler -->
+    <script>
+        let fname = document.getElementById('fname')
+        let sname = document.getElementById('sname')
+        let lname = document.getElementById('lname')
+        let state = document.getElementById('state')
+        let lga = document.getElementById('lga')
+        let dob = document.getElementById('dob')
+
+        //files
+        let waec = document.getElementById('waec')
+        let neco = document.getElementById('neco')
+        let utme = document.getElementById('utme')
+
+        // preview 
+        let waec_p = document.getElementById('waec-i')
+        let neco_p = document.getElementById('neco-i')
+        let utme_p = document.getElementById('utme-i')
+
+        // messages
+        let waec_message = document.getElementById('waec-message')
+        let neco_message = document.getElementById('neco-message')
+        let utme_message = document.getElementById('utme-message')
+
+        // image container
+        let image_container = document.getElementById('image-container')
+        let close_modal = document.querySelectorAll('material-icons-outlined.close-btn')
+
+
+        // Select all preview span element
+        let preview = document.querySelectorAll(".material-icons-outlined.preview")
+
+
+
+        async function profileAndFiles(payload) {
+            let { files, profile } = payload.data
+
+            let waecFile = files[0];
+            let necoFile = files[1];
+            let utmeFile = files[2];
+
+
+            // set profile text values
+            fname.textContent = profile.firstname.toUpperCase()
+            sname.textContent = profile.surname.toUpperCase()
+            lname.textContent = profile.firstname.toUpperCase()
+            state.textContent = profile.state.toUpperCase()
+            lga.textContent = profile.address.toUpperCase()
+            dob.textContent = profile.dob.toUpperCase()
+
+            // set disabled input value for user to see
+            waec.value = waecFile.originalname.toUpperCase()
+            neco.value = necoFile.originalname.toUpperCase()
+            utme.value = utmeFile.originalname.toUpperCase()
+
+            // set file status
+            checkFileStatus(files)
+
+            // set hidden input value for preview modal
+            waec_p.value = waecFile.filename;
+            neco_p.value = necoFile.filename;
+            utme_p.value = utmeFile.filename;
+
+        }
+
+        function checkFileStatus(file) {
+
+            let waecFile = file[0];
+            let necoFile = file[1];
+            let utmeFile = file[2];
+
+            // if file status is not accepted then display the
+            // rejected message
+
+            if(waecFile.name === "waec" && waecFile.status !== "accepted") {
+                waec_message.classList.toggle("active")
+            }
+
+            if(necoFile.name === "neco" && necoFile.status !== "accepted") {
+                neco_message.classList.toggle("active")
+            }
+
+            if(utmeFile.name === "utme" && utmeFile.status !== "accepted") {
+                utme_message.classList.toggle("active")
+            }
+
+        }
+
+    </script>
+
+    <!-- Image Modal Handler -->
+    <script>
+
+        preview.forEach(element => {
+            element.addEventListener("click", function(e) {
+                let filePath = e.target.firstElementChild.value
+
+                let thisElementParent = e.target.parentElement
+
+                let fileTitle = thisElementParent.childNodes[1].innerText
+
+                let url = `../uploads/${filePath}`
+                image_container.innerHTML = ""
+                let data = `
+                <div class="head">
+                    <span>${fileTitle} Uploaded</span>
+                    <span class="material-icons-outlined close-btn" id="close-modal">close</span>
+                </div>
+                <div class="body">
+                    <img src="${url}" alt="image">
+                    <!-- <div class="rejected">
+                        <span class="material-icons-outlined">reject</>    
+                    </div> -->
+                </div>
+                `
+
+                image_container.classList.toggle("active")
+                image_container.innerHTML = data
+
+                
+                let modalClose = image_container.children[0].children['close-modal']
+                modalClose.addEventListener("click", function() {
+                    image_container.classList.toggle("active")
+                })
+
+                let spanRejectMessage = document.querySelector(".rejected")
+                
+                // change active state of spanRejectMessage if file is rejected
+
+            })
+
+        })
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    outline: 0;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 60px 1fr;
+    grid-template-areas:
+        "navbar"
+        "main";
+    place-items: center;
+    align-items: stretch;
+    gap: 46px;
+    font-family: poppins, sans-serif;
+}
+
+
+.navbar {
+    grid-area: navbar;
+    display: flex;
+    width: 80%;
+    padding: 10px;
+    background-color: rgb(205, 202, 202);
+    border-radius: 5px;
+    justify-content: space-between;
+    height: 40px;
+    align-items: center;
+}
+.navbar .logo {
+    font-size: 1.2rem;
+}
+
+.navbar div div span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 100px;
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.navbar .status::before {
+    content: 'cloud';
+    font-family: "Material Icons Outlined";
+}
+
+.navbar .logout::after {
+    content: 'logout';
+    font-family: "Material Icons Outlined";
+}
+
+a:any-link {
+    color: black;
+}
+
+.navbar div {
+    display: flex;
+    gap: 10px;
+}
+
+.form-container {
+    grid-area: main;
+    width: 80%;
+    height: 300px;
+}
+
+.form-container .form-body .title {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.form-container .form-body form .body {
+    display: flex;
+    width: 100%;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-content: center;
+    justify-content: space-evenly;
+}
+
+
+.form-container .form-body form .body  div {
+    width: calc(100%/ 2 - 5px);
+    margin-top: 5px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+}
+
+.form-container .form-body form .body  div .affirm {
+    position: absolute;
+    top: 6px;
+    right: 35px;
+    color: #65cb65;
+    font-size: 1.35rem;
+    font-weight: 600;
+}
+
+.form-container .form-body form .body div span {
+    font-size: 1.2rem;
+}
+
+.form-container .form-body form .body div input {
+    height: 35px;
+    width: 90%;
+    padding: 4px;
+    border-radius: 4px;
+    font-size: 1rem;
+    border: 1px solid black;
+    margin-top: 5px;
+}
+
+.form-container .form-body form .body .extra-info {
+    width: 100%;
+    display: flex;
+    justify-content: end;
+    margin-top: 10px;
+    cursor: pointer;
+    font-size: 0.8rem;
+}
+
+.form-container .form-body form .btn {
+    width: 100%;
+}
+
+.form-container .form-body form .btn button {
+    margin-top: 30px;
+    height: 35px;
+    width: 95%;
+    cursor: pointer;
+    letter-spacing: 1px;
+    font-weight: 600;
+}

@@ -1,0 +1,267 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+
+* {
+    padding: 0;
+    margin: 0;
+    outline: 0;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+.container {
+    width: 100vw;
+    height: 100vh;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 60px 1fr;
+    grid-template-areas:
+        "navbar"
+        "main";
+    place-items: center;
+    align-items: stretch;
+    gap: 46px;
+    font-family: poppins, sans-serif;
+}
+
+
+.navbar {
+    grid-area: navbar;
+    display: flex;
+    width: 80%;
+    padding: 10px;
+    background-color: rgb(205, 202, 202);
+    border-radius: 5px;
+    justify-content: space-between;
+    height: 40px;
+    align-items: center;
+}
+.navbar .logo {
+    font-size: 1.2rem;
+}
+
+.navbar div div span {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    width: 100px;
+    padding: 2px;
+    border-radius: 4px;
+}
+
+.navbar .upload::before {
+    content: 'upload';
+    font-family: "Material Icons Outlined";
+}
+
+.navbar .logout::after {
+    content: 'logout';
+    font-family: "Material Icons Outlined";
+}
+
+a:any-link {
+    color: black;
+}
+
+.navbar div {
+    display: flex;
+    gap: 10px;
+}
+
+.form-container {
+    grid-area: main;
+    width: 80%;
+    height: 300px;
+    position: relative;
+}
+
+.form-container .form-body .title {
+    font-size: 1.3rem;
+    margin-bottom: 10px;
+}
+
+.form-container .form-body form {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+
+    font-size: 1.12rem;
+}
+
+.subtitle {
+    font-size: 1.18rem;
+    position: relative;
+
+}
+
+.subtitle::before {
+    content: '';
+    position: absolute;
+    display: block;
+    bottom: 0;
+    left: 0;
+    width: 30px;
+    margin-top: 2px;
+    height: 3px;
+    background: rgb(78, 220, 78);
+}
+
+.details {
+    display: flex;
+    flex-direction: column;
+}
+
+.details div, .location div {
+    display: flex;
+    flex-direction: row;
+    padding-left: 10px;
+    gap: 50%;
+}
+
+.details div span, .location div span {
+    width: 100px;
+}
+
+.details, .files, .location {
+    margin-top: 10px;
+    transition: 300ms ease-in-out;
+}
+
+.files {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 20px;
+}
+
+.files div {
+    display: flex;
+    flex-direction: column;
+    padding-left: 10px;
+    margin-top: 5px;
+    position: relative;
+}
+
+.files div input[type="text"] {
+    height: 35px;
+    outline: none;
+    padding-left: 10px;
+    font-size: 1rem;
+    margin-top: 5px;
+    border: 1px solid black;
+    border-radius: 4px;
+}
+
+.files div .preview {
+    position: absolute;
+    left: 85%;
+    top: 0;
+    color: black;
+    font-size: 1.25rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 200ms ease;
+}
+
+.files div .preview:hover {
+    transform: scale(1.1);
+}
+
+.files div .message {
+    display: none;
+    font-size: 0.8rem;
+    width: 100%;
+    align-items: end;
+    color: red;
+    font-weight: 600;
+}
+
+.message.active {
+    display: flex !important;
+}
+
+
+
+
+
+
+
+
+
+.form-container .form-body form .image-container {
+    display: flex;
+    flex-direction: column;
+    position: fixed;
+    align-items: center;
+    border-radius: 5px;
+    background-color: rgb(211, 208, 208);
+    z-index: 5;
+    width: 80%;
+    height: fit-content;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.image-container.active {
+    display: none !important;
+    visibility: hidden;
+}
+
+.form-container .form-body form .image-container .head {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    width: 80%;
+    margin-top: 10px;
+}
+
+.form-container .form-body form .image-container .head .close-btn:hover {
+    cursor: pointer;
+    transform: scale(1.1);
+    transition: 500ms;
+}
+
+.form-container .form-body form .image-container .body {
+    margin-top: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+}
+
+.form-container .form-body form .image-container .body img {
+    width: 70%;
+    max-width: 250px;
+    height: auto;
+    max-width: 400px;
+}
+
+.form-container .form-body form .image-container .body .rejected {
+    display: flex;
+    align-items: center;
+    height: fit-content;
+    width: fit-content;
+    justify-content: center;
+    
+}
+
+.rejected.active {
+    display: none !important;
+    visibility: hidden;
+}
+
+.form-container .form-body form .image-container .body .rejected:hover {
+    transform: scale(1.1);
+}
+
+.form-container .form-body form .image-container .body .rejected::after {
+    content: "Not Accepted";
+    width: fit-content;
+    font-size: 1rem;
+    color: red;
+}
+
+

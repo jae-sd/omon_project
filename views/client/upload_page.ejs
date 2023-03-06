@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Your File</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+    <link rel="stylesheet" href="./upload.css">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <span class="logo">LOGO</span>
+            <div>
+
+                <!-- make this dynamically add user id before navigation -->
+                <div class="button">
+                    <span class="status">
+                        <a href="/status/?user=<%= userId %>">Status</a>
+                    </span>
+                </div>
+                <div class="button">
+                    <span class="logout">
+                        <a href="/logout">Logout</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-body">
+                <div class="title">Upload Your Documents</div>
+                <form action="/upload" method="POST" enctype="multipart/form-data">
+                    <div class="body">
+
+                        <!-- firstname etc -->
+                            <div>
+                                <span>Firstname</span>
+                                <input type="text" placeholder="firstname" name="fname" required>
+                            </div>
+                            <div>
+                                <span>Surname</span>
+                                <input type="text" placeholder="surname" name="sname" required>
+                            </div>
+                            <div>
+                                <span>Lastname</span>
+                                <input type="text" placeholder="lastname" name="lname" required>
+                            </div>
+
+                        <!-- utme etc -->
+                            <div>
+                                <span>Waec</span>
+                                <input id="waec" type="file" accept="image/*" name="file" required>
+                            </div>
+                            <div>
+                                <span>Neco</span>
+                                <input id="neco" type="file" accept="image/*" name="file" required>
+                            </div>
+                            <div>
+                                <span>Utme</span>
+                                <input id="utme" type="file" accept="image/*" name="file" required>
+                            </div>
+                        
+                        <!-- state etc -->
+                            <div>
+                                <span>Address</span>
+                                <input type="text" placeholder="Salt Lake Avenue" name="address" required>
+                            </div>
+                            <div>
+                                <span>State</span>
+                                <input type="text" placeholder="Lagos" name="state" required>
+                            </div>
+                            <div>
+                                <span>DOB</span>
+                                <input type="date" placeholder="date of birth" name="dob" required>
+                            </div>
+                    </div>
+                    <div class="btn">
+                        <button type="submit">Upload</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    <script>
+
+        let form = document.querySelector('form')
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // form body selectors
+            let fname = form.fname.value;
+            let sname = form.sname.value;
+            let lname = form.lname.value;
+            let state = form.state.value;
+            let address = form.address.value;
+            let dob = form.dob.value;
+
+            // form file Selectors
+            let waec = document.getElementById('waec');
+            let neco = document.getElementById('neco');
+            let utme = document.getElementById('utme');
+
+
+            let data = new FormData();
+            data.append('file', waec.files[0]);
+            data.append('file', neco.files[0]);
+            data.append('file', utme.files[0]);
+            data.append('firstname', fname)
+            data.append('surname', sname)
+            data.append('lastname', lname)
+            data.append('state', state)
+            data.append('address', address)
+            data.append('dob', dob)
+
+
+            let request = await fetch("/upload-mutiple", {
+                'credentials': 'include',
+                method: "POST",
+                body: data
+            });
+
+            let res = await request.json();
+
+
+            return request.status === 200 ? location.assign(`/status/?user=${res.id}`) : console.log(res.message)
+
+        })
+    </script>
+</body>
+</html>

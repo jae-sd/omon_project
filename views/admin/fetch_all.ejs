@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Recent Registrations</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+    <link rel="stylesheet" href="./all-users.css">
+</head>
+<body onload="onload()">
+
+    <div class="container">
+        <div class="navbar">
+            <span class="logo">LOGO</span>
+            <div>
+                <!-- <div class="button">
+                    <span class="login">Login</span>
+                </div> -->
+                <div class="button">
+                    <span class="logout">Logout</span>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="table-container">
+            <div class="title">New Registrations</div>
+            <!-- <div class="table-controls">
+                <span class="refresh"><span class="material-icons-outlined">refresh</span></span>
+                <span class="material-icons-outlined">sort</span>
+            </div> -->
+            <div class="head">
+                <span class="child">Id</span>
+                <span class="child">Email</span>
+                <span class="child">Approve</span>
+            </div>
+            <div class="body" id="body"></div>
+            <div class="footer" id="pagination"></div>
+        </div>
+    </div>
+    
+    
+    <script>
+        async function onload() {
+            let request = await fetch("/admin/all", {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
+            let data = await request.json()
+
+            function setTableData(payload) {
+                DisplayList(payload, list_element, rows, current_page);
+                SetupPagination(payload, pagination_element, rows);
+            }
+
+            return request.status === 200 ? setTableData(data.users) : console.log(data);
+        }
+    </script>
+
+    <script src="./all_users.js" defer ></script>
+</body>
+</html>

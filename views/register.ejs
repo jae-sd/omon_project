@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SIGN UP</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined">
+    <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <span class="logo">LOGO</span>
+            <div>
+                <div class="button">
+                    <span class="login">
+                        <a href="/login">Login</a>
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="form-container">
+            <div class="form-body">
+                <div class="title">Sign Up</div>
+                <form action="/">
+                    <div class="body">
+                        <div>
+                            <span>Email</span>
+                            <input type="text" placeholder="email@gmail.com" name="email">
+                        </div>
+                        <div>
+                            <span>Password</span>
+                            <input type="password" placeholder="Password" name="password">
+                        </div>
+                        <div  class="extra-info">
+                            <a href="/login">Have an account already....</a>
+                        </div>
+                        <div>
+                            <button type="submit">Register</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Logout Button Handler -->
+    <%- include("./layout/logout") %>
+
+    <script>
+        
+        let form = document.querySelector('form')
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            let email = form.email.value;
+            let password = form.password.value;
+
+            let request = await fetch("/sign-up", {
+                method: "POST",
+                body: JSON.stringify({ email, password }),
+                headers: {
+                    "content-type": "application/json"
+                }
+            });
+
+            let data = await request.json();
+            return request.status === 200 ? location.assign('/signin') : console.log(data);
+        })
+    </script>
+</body>
+</html>
