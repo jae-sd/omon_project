@@ -15,10 +15,6 @@ const checkCookie = async (req, res, next) => {
     }
 }
 
-router.get("/", (req, res) => {
-    res.send("Server Is Ok")
-})
-
 // sign up page
 router.get("/register", (req, res) => {
     res.render(path.join(__dirname, "..", "views", "register"))
