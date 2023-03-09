@@ -15,7 +15,6 @@ const DB = require("./config/db")((error) => {
     app.listen(PORT, () => console.log(`....Server started....`))
 })
 
-const User = require("./model/index")
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json())
