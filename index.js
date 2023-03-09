@@ -4,6 +4,7 @@ const express = require("express")
 const app = express()
 const bodyParser = require("body-parser")
 const cookieParser = require('cookie-parser')
+const path = require("path")
 
 
 // Routes
@@ -27,6 +28,9 @@ app.set("view engine", "ejs");
 app.set("views", "views");
 app.use(express.static("public"));
 app.use(cookieParser())
+
+
+app.get("/", (req, res) => res.render(path.join("register")))
 
 app.use(frontend_route);
 app.use(api_route)
