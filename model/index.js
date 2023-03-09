@@ -5,19 +5,10 @@ const itemSchema = new mongoose.Schema({
     id: {
         type: String
     },
-    originalname: {
+    public_id: {
         type: String
     },
-    encoding: {
-        type: String
-    },
-    mimetype: {
-        type: String
-    },
-    filename: {
-        type: String
-    },
-    path: {
+    signature: {
         type: String
     },
     status: {

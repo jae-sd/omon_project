@@ -1,6 +1,6 @@
 const User = require("../model/index");
-const fs = require("fs")
-const path = require("path")
+const cloudinary = require("cloudinary").v2
+
 
 const returnFiles = async (id) => {
     try {
@@ -9,9 +9,8 @@ const returnFiles = async (id) => {
         return files.images.map(element => {
             return {
                 name: element.id,
-                originalname: element.originalname,
-                filename: element.filename,
-                path: element.path,
+                public_id: element.public_id,
+                signature: element.signature,
                 status: element.status
             }
         })
@@ -22,7 +21,7 @@ const returnFiles = async (id) => {
 
 const validateCookie = async (req, res, next) => {
     try {
-        const id = req.cookies?.jwt;
+        const id = req.headers?.jwt || req.cookies?.jwt;
         if (!id) return res.status(400).send({ message: "Error with request" })
 
         const userExists = await User.findOne({ _id: id })
@@ -35,16 +34,38 @@ const validateCookie = async (req, res, next) => {
     }
 }
 
-// C:\Users\USER\Desktop\Omon Project\helper\helper.js ../, "public", "uploads"
-const removeRejectedFile = async (filename) => {
-    fs.rm(path.join(__dirname, "..", "public", "uploads", filename), (err) => {
-        if(err) return
-    })
+
+const removeRejectedFiles = async (array) => {
+    
+    // {
+    //     deleted: {
+    //       sfp8istpxozegzwvvdem: 'deleted',
+    //       fywgggnxh4zqtchrh5vr: 'deleted',
+    //       dt5vrv74iixjr9irzec2: 'deleted'
+    //     },
+    //     deleted_counts: {
+    //       sfp8istpxozegzwvvdem: { original: 1, derived: 0 },
+    //       fywgggnxh4zqtchrh5vr: { original: 1, derived: 0 },
+    //       dt5vrv74iixjr9irzec2: { original: 1, derived: 0 }
+    //     },
+    //     partial: false,
+    //     rate_limit_allowed: 500,
+    //     rate_limit_reset_at: 2023-03-08T21:00:00.000Z,
+    //     rate_limit_remaining: 498
+    // }
+
+    try {
+        const removed = await cloudinary.api.delete_resources(array)
+        return removed
+    } catch (error) {
+        throw new Error('Cloudinary File Delete Error')
+    }
+
 }
 
 
 module.exports = {
     returnFiles,
     validateCookie,
-    removeRejectedFile
+    removeRejectedFiles
 }

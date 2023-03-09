@@ -105,31 +105,111 @@
             let neco = document.getElementById('neco');
             let utme = document.getElementById('utme');
 
+            // cloudinary auth
+            const api_key = "917878775246812"
+            const cloud_name = "dxxswax97"
+        
+        
+            const signatureResponse = await fetch("/get-signature", {
+                method: "GET",
+                headers: {
+                    'content-type': 'application/json'
+                }
+            })
 
-            let data = new FormData();
-            data.append('file', waec.files[0]);
-            data.append('file', neco.files[0]);
-            data.append('file', utme.files[0]);
-            data.append('firstname', fname)
-            data.append('surname', sname)
-            data.append('lastname', lname)
-            data.append('state', state)
-            data.append('address', address)
-            data.append('dob', dob)
+            let signatureData = await signatureResponse.json()
+
+            let profileData = new FormData();
+            profileData.append('firstname', fname)
+            profileData.append('surname', sname)
+            profileData.append('lastname', lname)
+            profileData.append('state', state)
+            profileData.append('address', address)
+            profileData.append('dob', dob)
 
 
-            let request = await fetch("/upload-mutiple", {
-                'credentials': 'include',
+            let dataWaec = new FormData();
+            dataWaec.append('file', waec.files[0]);
+            dataWaec.append("api_key", api_key)
+            dataWaec.append("signature", signatureData.signature)
+            dataWaec.append("timestamp", signatureData.timestamp)
+
+
+            let dataNeco = new FormData();
+            dataNeco.append('file', neco.files[0]);
+            dataNeco.append("api_key", api_key)
+            dataNeco.append("signature", signatureData.signature)
+            dataNeco.append("timestamp", signatureData.timestamp)
+
+
+            let dataUtme = new FormData();
+            dataUtme.append('file', utme.files[0]);
+            dataUtme.append("api_key", api_key)
+            dataUtme.append("signature", signatureData.signature)
+            dataUtme.append("timestamp", signatureData.timestamp)
+            
+
+
+            let uploadWaec = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
                 method: "POST",
-                body: data
+                body: dataWaec
             });
 
-            let res = await request.json();
+            let waecRes = await uploadWaec.json()
+
+            let uploadNeco = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
+                method: "POST",
+                body: dataNeco
+            });
+
+            let necoRes = await uploadNeco.json()
+            
+            let uploadUtme = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
+                method: "POST",
+                body: dataUtme
+            });
+
+            let utmeRes = await uploadUtme.json()
 
 
-            return request.status === 200 ? location.assign(`/status/?user=${res.id}`) : console.log(res.message)
+            //console.log(waecRes, necoRes, utmeRes)
+
+            let fileData = [
+                {
+                    id: "waec",
+                    public_id: waecRes.public_id,
+                    signature: waecRes.signature
+                },
+                {
+                    id: "neco",
+                    public_id: necoRes.public_id,
+                    signature: necoRes.signature
+                },
+                {
+                    id: "utme",
+                    public_id: utmeRes.public_id,
+                    signature: utmeRes.signature
+                }
+            ]
+
+
+            // send the image info back to our server
+            let uploadRequest = await fetch("/upload-mutiple", {
+                'credentials': 'include',
+                method: "POST",
+                headers: {
+                    'content-type': 'application/json'
+                },
+                body: JSON.stringify({ profileData, files: fileData})
+            })
+
+            let res = await uploadRequest.json()
+            return uploadRequest.status === 200 ? location.assign(`/status/?user=${res.id}`) : console.log(res.message)
+
+
 
         })
     </script>
+
 </body>
 </html>

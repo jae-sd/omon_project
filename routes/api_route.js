@@ -1,71 +1,56 @@
 const express = require("express");
 const router = express.Router();
-const multer = require("multer");
-const path = require("path");
 const User = require("../model");
+const cloudinary = require("cloudinary").v2
 
-const { returnFiles, validateCookie, removeRejectedFile } = require("../helper/helper")
-
-
-
-const storage = multer.diskStorage({
-    destination: "public/uploads",
-    filename: function (req, file, cb) {
-        cb(null, 'file' + Date.now() + path.extname(file.originalname))
-    }
+const cloudinaryConfig = cloudinary.config({
+    cloud_name: process.env.CLOUDNAME,
+    api_key: process.env.CLOUDAPIKEY,
+    api_secret: process.env.CLOUDINARYSECRET,
+    secure: true
 })
 
-const upload = multer({
-    storage: storage,
-    fileFilter: function (req, file, cb) {
-        let validextensions = ['.png', '.jpg', '.jpeg'];
-        let ext = path.extname(file.originalname);
-        if (!validextensions.includes(ext)) {
-            return cb(new Error(" Please choose supported format"))
-        }
+// console.log(cloudinaryConfig.cloud_name)
 
-        cb(null, true);
-    },
-    limits: {
-        fileSize: 125000 * 10
-    }
-})
+
+const { returnFiles, validateCookie, removeRejectedFiles } = require("../helper/helper")
+
 
 
 
 // Route for registration
 router.post("/sign-up", async (req, res) => {
     const { email, password } = req.body;
-    if(!email && !password) return res.status(400).send({ message: "Error with request"})
+    if (!email && !password) return res.status(400).send({ message: "Error with request" })
 
     try {
         const exist = await User.findOne({ email })
         if (exist) return res.send({ message: "User exists" })
-    
+
         let newUser = new User({ email, password })
-    
+
         await newUser.save()
         res.status(200).send({ message: "Register Successful", newUser })
     } catch (error) {
-        res.status(500).send({ message: "Error with request"})
+        res.status(500).send({ message: "Error with request" })
     }
 })
 
 // Route for Login
 router.post("/sign-in", async (req, res) => {
     const { email, password } = req.body;
-    if(!email || !password) return res.status(400).send({ message: "Error with request"})
+    if (!email || !password) return res.status(400).send({ message: "Error with request" })
 
     try {
         const exists = await User.findOne({ email })
         if (!exists) return res.send({ message: "User does not exist" })
-    
+
         let thirtyMins = 30 * 60 * 60 * 1000;
 
-        res.cookie('jwt', exists._id, { httpOnly: true, maxAge: thirtyMins})
+        res.cookie('jwt', exists._id, { httpOnly: true, maxAge: thirtyMins })
         res.status(200).send({ message: "Login successful" })
     } catch (error) {
-        res.status(500).send({ message: "Error with request"})
+        res.status(500).send({ message: "Error with request" })
     }
 })
 
@@ -77,115 +62,43 @@ router.post("/upload-mutiple", validateCookie, async (req, res) => {
     let id = req?.cookies;
     if (!id) return res.status(400).send({ message: "Error with request" })
 
-    let userFilesExist = await User.findOne({ _id: id })
-    if (userFilesExist.images.length > 0) return res.status(400).send({ message: "Files already uploaded" })
+    try {
 
-    upload.array('file', 3)(req, res, async (err) => {
+        // request body
+        let {
+            firstname,
+            surname,
+            lastname,
+            state,
+            address,
+            dob
+        } = req.body?.profileData
 
-        if (err) return res.status(400).send({ message: err })
+        let files = req.body?.files
 
-        try {
+        let doesFilesExist = await User.findOne({ _id: id })
 
-            // request body
-            let {
-                firstname,
-                surname,
-                lastname,
-                state,
-                address,
-                dob
-            } = req?.body;
-
-            // waec file request object
-            let waecObj = {
-                id: 'waec',
-                originalname: req.files[0]?.originalname,
-                encoding: req.files[0]?.encoding,
-                mimetype: req.files[0]?.mimetype,
-                filename: req.files[0]?.filename,
-                path: req.files[0]?.path
-            }
-
-            // neco file request object
-            let necoObj = {
-                id: 'neco',
-                originalname: req.files[1]?.originalname,
-                encoding: req.files[1]?.encoding,
-                mimetype: req.files[1]?.mimetype,
-                filename: req.files[1]?.filename,
-                path: req.files[1]?.path
-            }
-
-            // utme file request object
-            let utmeObj = {
-                id: 'utme',
-                originalname: req.files[2]?.originalname,
-                encoding: req.files[2]?.encoding,
-                mimetype: req.files[2]?.mimetype,
-                filename: req.files[2]?.filename,
-                path: req.files[2]?.path
-            }
+        // return an array of users file public_id
+        let deletePreviousFiles = doesFilesExist.images.map(items => items.public_id)
+        await removeRejectedFiles(deletePreviousFiles)
 
 
-            await User.updateOne({ _id: id }, {
-                firstname,
-                surname,
-                lastname,
-                state,
-                address,
-                dob,
-                images: [
-                    waecObj,
-                    necoObj,
-                    utmeObj
-                ]
-            })
-
-            return res.status(200).send({ message: "Uploaded multiple files", id })
-
-        } catch (error) {
-            res.status(500).send({ message: "Error with request" })
-        }
-    })
-})
+        await User.updateOne({ _id: id }, {
+            firstname,
+            surname,
+            lastname,
+            state,
+            address,
+            dob,
+            images: files
+        })
 
 
-// Client route to handle single file upload
-// Used to update already uploaded and rejected files
-router.post("/upload-single/:fileType", validateCookie, async (req, res) => {
+        return res.status(200).send({ message: "Uploaded multiple files", id })
 
-    let id = req?.cookies;
-    let { fileType } = req.params; // neco || waec || utme
-    if (!id || !fileType) return res.status(400).send({ message: "Error with request" })
-
-    upload.single('file')(req, res, async (err) => {
-
-        if (err) return res.status(400).send({ err })
-
-        try {
-
-            // remove file from local storage then update db
-            let user = await User.findOne({ _id: id });
-            let userfile = user.images.find(obj => obj.id === fileType)
-            removeRejectedFile(userfile.filename)
-
-
-            let newFile = await User.updateOne({
-                _id: id,
-                "images.id": fileType
-            }, {
-                $set: {
-                    "images.$.filename": req.file?.filename,
-                    "images.$.path": req.file?.path,
-                }
-            })
-
-            return res.status(200).send({ message: "File has been updated", newFile })
-
-        } catch (error) {
-            res.status(500).send({ message: "Error with request", error })
-        }
-    })
+    } catch (error) {
+        res.status(500).send({ message: "Error with request" })
+    }
 })
 
 
@@ -212,7 +125,7 @@ router.get("/data/:id", async (req, res) => {
 
         return res.status(200).send({ message: "success", data: { files, profile } })
     } catch (error) {
-        res.status(400).send({ message: "Error with request" })
+        res.status(500).send({ message: "Error with request" })
     }
 })
 
@@ -255,6 +168,22 @@ router.post("/admin/edit/:id/:file", async (req, res) => {
     }
 
 })
+
+router.get("/get-signature", (req, res) => {
+    try {
+        const timestamp = Math.round(new Date().getTime() / 1000)
+        const signature = cloudinary.utils.api_sign_request(
+            {
+                timestamp: timestamp
+            },
+            cloudinaryConfig.api_secret
+        )
+        res.send({ timestamp, signature })
+    } catch (error) {
+        res.status(500).send({ message: "Error with request" })
+    }
+})
+
 
 
 router.get("/logout", (req, res) => {

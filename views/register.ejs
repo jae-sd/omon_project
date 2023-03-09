@@ -46,8 +46,6 @@
         </div>
     </div>
 
-    <!-- Logout Button Handler -->
-    <%- include("./layout/logout") %>
 
     <script>
         
@@ -68,7 +66,7 @@
             });
 
             let data = await request.json();
-            return request.status === 200 ? location.assign('/signin') : console.log(data);
+            return request.status === 200 ? location.assign('/login') : console.log(data);
         })
     </script>
 </body>

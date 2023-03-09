@@ -176,28 +176,29 @@
             let waecFile = files[0];
             let necoFile = files[1];
             let utmeFile = files[2];
-
+            
 
             // set profile text values
-            fname.textContent = profile.firstname.toUpperCase()
-            sname.textContent = profile.surname.toUpperCase()
-            lname.textContent = profile.firstname.toUpperCase()
-            state.textContent = profile.state.toUpperCase()
-            lga.textContent = profile.address.toUpperCase()
-            dob.textContent = profile.dob.toUpperCase()
+            fname.textContent = profile.firstname?.toUpperCase()
+            sname.textContent = profile.surname?.toUpperCase()
+            lname.textContent = profile.firstname?.toUpperCase()
+            state.textContent = profile.state?.toUpperCase()
+            lga.textContent = profile.address?.toUpperCase()
+            dob.textContent = profile.dob?.toUpperCase()
 
             // set disabled input value for user to see
-            waec.value = waecFile.originalname.toUpperCase()
-            neco.value = necoFile.originalname.toUpperCase()
-            utme.value = utmeFile.originalname.toUpperCase()
+            waec.value = waecFile.name?.toUpperCase()
+            neco.value = necoFile.name?.toUpperCase()
+            utme.value = utmeFile.name?.toUpperCase()
 
             // set file status
             checkFileStatus(files)
 
-            // set hidden input value for preview modal
-            waec_p.value = waecFile.filename;
-            neco_p.value = necoFile.filename;
-            utme_p.value = utmeFile.filename;
+            // hidden input element am using as 
+            // a variable to store file details
+            waec_p.value = waecFile?.public_id;
+            neco_p.value = necoFile?.public_id;
+            utme_p.value = utmeFile?.public_id;
 
         }
 
@@ -207,18 +208,18 @@
             let necoFile = file[1];
             let utmeFile = file[2];
 
-            // if file status is not accepted then display the
+            // if file status value is not accepted then display the
             // rejected message
 
-            if(waecFile.name === "waec" && waecFile.status !== "accepted") {
+            if(waecFile?.name === "waec" && waecFile?.status !== "accepted") {
                 waec_message.classList.toggle("active")
             }
 
-            if(necoFile.name === "neco" && necoFile.status !== "accepted") {
+            if(necoFile?.name === "neco" && necoFile?.status !== "accepted") {
                 neco_message.classList.toggle("active")
             }
 
-            if(utmeFile.name === "utme" && utmeFile.status !== "accepted") {
+            if(utmeFile?.name === "utme" && utmeFile?.status !== "accepted") {
                 utme_message.classList.toggle("active")
             }
 
@@ -231,13 +232,20 @@
 
         preview.forEach(element => {
             element.addEventListener("click", function(e) {
-                let filePath = e.target.firstElementChild.value
+
+                // cloudinary auth
+                const api_key = "917878775246812"
+                const cloud_name = "dxxswax97"
+
+                // input element am using as a variable to store
+                // file details
+                let file_id = e.target.firstElementChild.value
 
                 let thisElementParent = e.target.parentElement
-
                 let fileTitle = thisElementParent.childNodes[1].innerText
 
-                let url = `../uploads/${filePath}`
+                let url = `https://res.cloudinary.com/${cloud_name}/image/upload/${file_id}.jpg`
+                
                 image_container.innerHTML = ""
                 let data = `
                 <div class="head">
