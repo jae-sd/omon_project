@@ -10,8 +10,6 @@ const cloudinaryConfig = cloudinary.config({
     secure: true
 })
 
-// console.log(cloudinaryConfig.cloud_name)
-
 
 const { returnFiles, validateCookie, removeRejectedFiles } = require("../helper/helper")
 
@@ -60,7 +58,7 @@ router.post("/sign-in", async (req, res) => {
 router.post("/upload-mutiple", validateCookie, async (req, res) => {
 
     let id = req?.cookies;
-    if (!id) return res.status(400).send({ message: "Error with request" })
+    if (!id) return res.status(400).send({ message: "ID not found" })
 
     try {
 
@@ -80,7 +78,8 @@ router.post("/upload-mutiple", validateCookie, async (req, res) => {
 
         // return an array of users file public_id
         let deletePreviousFiles = doesFilesExist.images.map(items => items.public_id)
-        await removeRejectedFiles(deletePreviousFiles)
+        if (deletePreviousFiles.length > 0) await removeRejectedFiles(deletePreviousFiles)
+        
 
 
         await User.updateOne({ _id: id }, {
