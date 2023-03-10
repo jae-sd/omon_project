@@ -131,6 +131,7 @@
             })
      
             let data = await request.json()
+            console.log(data)
             
             return request.status === 200 ? profileAndFiles(data) : console.log("Error: ", data.message)
         }

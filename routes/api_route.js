@@ -2,6 +2,9 @@ const express = require("express");
 const router = express.Router();
 const User = require("../model");
 const cloudinary = require("cloudinary").v2
+const multer = require("multer")
+
+const reqBody = multer()
 
 const cloudinaryConfig = cloudinary.config({
     cloud_name: process.env.CLOUDNAME,
@@ -30,7 +33,7 @@ router.post("/sign-up", async (req, res) => {
         await newUser.save()
         res.status(200).send({ message: "Register Successful", newUser })
     } catch (error) {
-        res.status(500).send({ message: "Error with request" })
+        res.status(500).send(error)
     }
 })
 
@@ -48,14 +51,14 @@ router.post("/sign-in", async (req, res) => {
         res.cookie('jwt', exists._id, { httpOnly: true, maxAge: thirtyMins })
         res.status(200).send({ message: "Login successful" })
     } catch (error) {
-        res.status(500).send({ message: "Error with request" })
+        res.status(500).send(error)
     }
 })
 
 
 // Client route to handle file upload and request bodies
 // upload multiple
-router.post("/upload-mutiple", validateCookie, async (req, res) => {
+router.post("/upload-multiple", validateCookie, reqBody.none(), async (req, res) => {
 
     let id = req?.cookies;
     if (!id) return res.status(400).send({ message: "ID not found" })
@@ -70,7 +73,7 @@ router.post("/upload-mutiple", validateCookie, async (req, res) => {
             state,
             address,
             dob
-        } = req.body?.profileData
+        } = req.body?.profile
 
         let files = req.body?.files
 
@@ -79,7 +82,7 @@ router.post("/upload-mutiple", validateCookie, async (req, res) => {
         // return an array of users file public_id
         let deletePreviousFiles = doesFilesExist.images.map(items => items.public_id)
         if (deletePreviousFiles.length > 0) await removeRejectedFiles(deletePreviousFiles)
-        
+
 
 
         await User.updateOne({ _id: id }, {
@@ -96,10 +99,9 @@ router.post("/upload-mutiple", validateCookie, async (req, res) => {
         return res.status(200).send({ message: "Uploaded multiple files", id })
 
     } catch (error) {
-        res.status(500).send({ message: "Error with request" })
+        res.status(500).send(error)
     }
 })
-
 
 
 // Client route to get user's files from database
@@ -109,6 +111,10 @@ router.get("/data/:id", async (req, res) => {
     if (!id) return res.status(400).send({ message: "No user was passed" })
 
     try {
+
+        let noProfile = await User.findOne({ _id: id })
+        if (!noProfile.firstname) return res.status(400).send({ message: "User does not exist" })
+
         const files = await returnFiles(id)
         let profile = await User.findOne({ _id: id }, {
             email: 1,
@@ -124,7 +130,7 @@ router.get("/data/:id", async (req, res) => {
 
         return res.status(200).send({ message: "success", data: { files, profile } })
     } catch (error) {
-        res.status(500).send({ message: "Error with request" })
+        res.status(500).send(error)
     }
 })
 
@@ -137,7 +143,7 @@ router.get("/admin/all", async (req, res) => {
         })
         res.status(200).send({ message: "success", users })
     } catch (error) {
-        res.status(500).send({ message: "Error with request" })
+        res.status(500).send(error)
     }
 })
 
@@ -163,7 +169,7 @@ router.post("/admin/edit/:id/:file", async (req, res) => {
 
         res.status(200).send({ message: "success", user })
     } catch (error) {
-        res.status(500).send({ message: "Error with request" })
+        res.status(500).send(error)
     }
 
 })
@@ -179,7 +185,7 @@ router.get("/get-signature", (req, res) => {
         )
         res.send({ timestamp, signature })
     } catch (error) {
-        res.status(500).send({ message: "Error with request" })
+        res.status(500).send(error)
     }
 })
 

@@ -31,7 +31,7 @@
         <div class="form-container">
             <div class="form-body">
                 <div class="title">Upload Your Documents</div>
-                <form action="/upload" method="POST" enctype="multipart/form-data">
+                <form action="/upload-multiple" method="POST" >
                     <div class="body">
 
                         <!-- firstname etc -->
@@ -86,12 +86,14 @@
 
 
     <script>
+        'use strict'
 
         let form = document.querySelector('form')
 
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
-
+            
+            
             // form body selectors
             let fname = form.fname.value;
             let sname = form.sname.value;
@@ -108,8 +110,7 @@
             // cloudinary auth
             const api_key = "917878775246812"
             const cloud_name = "dxxswax97"
-        
-        
+
             const signatureResponse = await fetch("/get-signature", {
                 method: "GET",
                 headers: {
@@ -118,98 +119,117 @@
             })
 
             let signatureData = await signatureResponse.json()
+            console.log(signatureData)
 
-            let profileData = new FormData();
-            profileData.append('firstname', fname)
-            profileData.append('surname', sname)
-            profileData.append('lastname', lname)
-            profileData.append('state', state)
-            profileData.append('address', address)
-            profileData.append('dob', dob)
-
-
-            let dataWaec = new FormData();
-            dataWaec.append('file', waec.files[0]);
-            dataWaec.append("api_key", api_key)
-            dataWaec.append("signature", signatureData.signature)
-            dataWaec.append("timestamp", signatureData.timestamp)
+            let waecFile = new FormData();
+            waecFile.append('file', waec.files[0]);
+            waecFile.append("api_key", api_key)
+            waecFile.append("signature", signatureData.signature)
+            waecFile.append("timestamp", signatureData.timestamp)
 
 
-            let dataNeco = new FormData();
-            dataNeco.append('file', neco.files[0]);
-            dataNeco.append("api_key", api_key)
-            dataNeco.append("signature", signatureData.signature)
-            dataNeco.append("timestamp", signatureData.timestamp)
+            let necoFile = new FormData();
+            necoFile.append('file', neco.files[0]);
+            necoFile.append("api_key", api_key)
+            necoFile.append("signature", signatureData.signature)
+            necoFile.append("timestamp", signatureData.timestamp)
 
 
-            let dataUtme = new FormData();
-            dataUtme.append('file', utme.files[0]);
-            dataUtme.append("api_key", api_key)
-            dataUtme.append("signature", signatureData.signature)
-            dataUtme.append("timestamp", signatureData.timestamp)
-            
+            let utmeFile = new FormData();
+            utmeFile.append('file', utme.files[0]);
+            utmeFile.append("api_key", api_key)
+            utmeFile.append("signature", signatureData.signature)
+            utmeFile.append("timestamp", signatureData.timestamp)
 
 
-            let uploadWaec = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
+            let data = new FormData();
+            data.append("firstname", fname)
+            data.append("surname", sname)
+            data.append("lastname", lname)
+            data.append("state", state)
+            data.append("address", address)
+            data.append("dob", dob)
+
+
+            let profile = {}
+            let pro = data.forEach((value, element) => {
+                profile[element] = value
+            })
+
+            const uploadWaec = async (payload) => {
+                const req = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
                 method: "POST",
-                body: dataWaec
-            });
+                body: payload
+                });
 
-            let waecRes = await uploadWaec.json()
+                return req.json()
+            }
 
-            let uploadNeco = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
+            const uploadNeco = async (payload) => {
+                const req = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
                 method: "POST",
-                body: dataNeco
-            });
+                body: payload
+                });
 
-            let necoRes = await uploadNeco.json()
-            
-            let uploadUtme = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
+                return req.json()
+            }
+
+            const uploadUtme = async (payload) => {
+                const req = await fetch(`https://api.cloudinary.com/v1_1/${cloud_name}/auto/upload`, {
                 method: "POST",
-                body: dataUtme
-            });
+                body: payload
+                });
 
-            let utmeRes = await uploadUtme.json()
+                return req.json()
+            }
 
 
-            //console.log(waecRes, necoRes, utmeRes)
 
-            let fileData = [
-                {
-                    id: "waec",
-                    public_id: waecRes.public_id,
-                    signature: waecRes.signature
-                },
-                {
-                    id: "neco",
-                    public_id: necoRes.public_id,
-                    signature: necoRes.signature
-                },
-                {
-                    id: "utme",
-                    public_id: utmeRes.public_id,
-                    signature: utmeRes.signature
-                }
-            ]
+            const haveBeenUploaded = async () => {
+                let waecResponse = uploadWaec(waecFile)
+                let necoResponse = uploadNeco(necoFile)
+                let utmeResponse = uploadUtme(utmeFile)
 
-            console.log(profileData)
+                let [waec, neco, utme] = await Promise.all([waecResponse, necoResponse, utmeResponse])
 
-            // send the image info back to our server
-            let uploadRequest = await fetch("/upload-mutiple", {
+                let fileData = [
+                    {
+                        id: "waec",
+                        public_id: waec.public_id,
+                        signature: waec.signature
+                    },
+                    {
+                        id: "neco",
+                        public_id: neco.public_id,
+                        signature: neco.signature
+                    },
+                    {
+                        id: "utme",
+                        public_id: utme.public_id,
+                        signature: utme.signature
+                    }
+                ] 
+                
+                return fileData
+
+            }
+
+
+            let uploadRequest = await fetch("/upload-multiple", {
                 'credentials': 'include',
                 method: "POST",
+                body: JSON.stringify({ profile, files: await haveBeenUploaded()}),
                 headers: {
                     'content-type': 'application/json'
-                },
-                body: JSON.stringify({ profileData, files: fileData})
+                }
             })
 
             let res = await uploadRequest.json()
             return uploadRequest.status === 200 ? location.assign(`/status/?user=${res.id}`) : console.log(res.message)
 
-
-
         })
+
+
     </script>
 
 </body>
